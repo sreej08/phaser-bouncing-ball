@@ -13,32 +13,128 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-
 let ball;
-let ballSize = 80;
-let yspeed = 0.5;
+let ballSize = 200;
 let xspeed = 1.0;
+let yspeed = 0.5;
+let lives = 10;
+let livesText;
+let gameOverText;
+
 
 function preload() {
-    this.load.image("ball", "assets/ball.png"); // watch out for case sensitivity
+    // Load assets here
+    this.load.image("ball", "assets/ball.png");
 }
 
 function create() {
-    ball = this.add.sprite(WIDTH / 2, HEIGHT / 2, "ball"); // x, y, and the ball "key"
-    ball.setDisplaySize(ballSize, ballSize); // width, height
+    // Initialize game objects here
+    gameOverText = this.add.text(WIDTH/2, HEIGHT/2, 'GAME OVER', {
+        fontSize: '64px',
+        fill: '#ff0000',
+    });
+    gameOverText.setOrigin(0.5);
+    gameOverText.setVisible(false);
+
+    ball = this.add.sprite(WIDTH / 2, HEIGHT / 4, "ball");
+    ball.setDisplaySize(ballSize, ballSize);
+
+    livesText = this.add.text(10, 10, `Lives: ${lives}`, {
+        fontSize: '24px',
+        fill: '#808080'
+    });
+    // make ball interactive
+    ball.setInteractive();
+    ball.on('pointerdown', function() {
+        console.log("Ball clicked!");
+        xspeed *= 1.1;
+        yspeed *= 1.1;
+        ballSize *= 0.9;
+        ball.setDisplaySize(ballSize, ballSize);
+
+        lives += 1;
+        if (lives <= 3) {
+            livesText.fill = '#ff0000';
+        } else if (lives <= 5) {
+            livesText.fill = '#ff8000';
+        } else {
+            livesText.fill = '#808080';
+        }
+        livesText.setText(`Lives: ${lives}`);
+    });
 }
 
 function update() {
+    // Game logic here
+    if (lives <= 0) {
+        return;
+    }
+    // if (yspeed < 0) {
+    //     yspeed -= 1;
+    // } else {
+    //     yspeed += 1;
+    // }
+
     ball.y += yspeed;
+    
+    // if (xspeed < 0) {
+    //     xspeed -= 1;
+    // } else {
+    //     xspeed += 1;
+    // }
     ball.x += xspeed;
 
-    // The || sign means "or"
-    if (ball.y >= HEIGHT - ballSize / 2 || ball.y <= ballSize / 2) {
-        // Multiplying by -1 will "flip" the direction
-        yspeed *= -1;
+    if (ball.x >= WIDTH - ballSize / 2  || ball.x <= ballSize / 2) {
+        xspeed = -xspeed;
+        lives--;
+        if (lives <= 3) {
+            livesText.fill = '#ff0000';
+        } else if (lives <= 5) {
+            livesText.fill = '#ff8000';
+        } else {
+            livesText.fill = '#808080';
+        }
+        livesText.setText(`Lives: ${lives}`);
+        checkGameOver();
     }
+    if (ball.y >= HEIGHT - ballSize / 2 || ball.y <= ballSize / 2) {
+        yspeed = -yspeed;
+        lives--;
+        if (lives <= 3) {
+            livesText.fill = '#ff0000';
+        } else if (lives <= 5) {
+            livesText.fill = '#ff8000';
+        } else {
+            livesText.fill = '#808080';
+        }
+        livesText.setText(`Lives: ${lives}`);
+        checkGameOver();
+    }
+}
 
-    if (ball.x >= WIDTH - ballSize / 2 || ball.x <= ballSize / 2) {
-        xspeed *= -1;
+function checkGameOver() {
+    if (lives <= 0) {
+        lives = 0;
+        livesText.setText('Lives: 0');
+        ball.setVisible(false);
+        gameOverText.setVisible(true);
+        setTimeout(() => {
+            gameOverText.setVisible(false);
+
+            setTimeout(() => {
+                gameOverText.setVisible(true);
+
+                setTimeout(() => {
+                    gameOverText.setVisible(false);
+
+                    setTimeout(() => {
+                        gameOverText.setVisible(true);
+                    }, 500);
+
+                }, 500);
+
+            }, 500);
+
+        }, 500);
     }
 }
