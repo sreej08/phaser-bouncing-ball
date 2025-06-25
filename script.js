@@ -20,11 +20,13 @@ let yspeed = 0.5;
 let lives = 10;
 let livesText;
 let gameOverText;
-
+let turboButton;
+let turboText;
 
 function preload() {
     // Load assets here
     this.load.image("ball", "assets/ball.png");
+    this.load.image("square", "assets/square.png");
 }
 
 function create() {
@@ -61,6 +63,17 @@ function create() {
             livesText.fill = '#808080';
         }
         livesText.setText(`Lives: ${lives}`);
+    });
+    turboButton = this.add.image(715, 20, 'square').setInteractive();
+    turboButton.setDisplaySize(250, 40);
+    turboText = this.add.text(635, 10, 'Turbo mode!', {
+        fontSize: 'bold 24px',
+        fill: '#000000'
+    });
+
+    turboButton.on('pointerdown', function () {
+        xspeed *= 3;
+        yspeed *= 3;
     });
 }
 
@@ -117,6 +130,8 @@ function checkGameOver() {
         lives = 0;
         livesText.setText('Lives: 0');
         ball.setVisible(false);
+        turboButton.setVisible(false);
+        turboText.setVisible(false);
         gameOverText.setVisible(true);
         setTimeout(() => {
             gameOverText.setVisible(false);
